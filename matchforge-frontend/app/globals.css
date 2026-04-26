@@ -1,0 +1,62 @@
+/* app/globals.css */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --ink: #0f0f0f;
+    --ink2: #3a3a3a;
+    --ink3: #6b6b6b;
+    --paper: #fafaf8;
+    --card: #ffffff;
+    --border: #e8e6e0;
+    --accent: #1a1a2e;
+    --gold: #c9a84c;
+    --emerald: #2d6a4f;
+    --rose: #c0392b;
+    --score-low: #e24b4a;
+    --score-mid: #ef9f27;
+    --score-high: #2d6a4f;
+  }
+
+  .dark {
+    --ink: #fafaf8;
+    --ink2: #c4c4c4;
+    --ink3: #9ca3af;
+    --paper: #0f0f12;
+    --card: #1a1a1f;
+    --border: #2a2a2e;
+    --accent: #2d2d44;
+    --emerald: #4ade80;
+    --gold: #fbbf24;
+  }
+
+  body {
+    @apply bg-[var(--paper)] text-[var(--ink)] font-body;
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--ink)] text-sm font-medium hover:bg-[var(--paper)] transition-all;
+  }
+  .btn-primary {
+    @apply bg-[var(--accent)] text-white border-[var(--accent)] hover:bg-[#161630];
+  }
+  .tag-match {
+    @apply bg-[#eaf3de] text-[#27500a] dark:bg-[#2d6a4f]/30 dark:text-[#6fdc8c];
+  }
+  .tag-miss-critical {
+    @apply bg-[#fcebeb] text-[#791f1f] dark:bg-[#c0392b]/30 dark:text-[#fca5a5];
+  }
+  .tag-miss-nice {
+    @apply bg-[#faeeda] text-[#633806] dark:bg-[#ef9f27]/30 dark:text-[#fbbf24];
+  }
+  .tag-bonus {
+    @apply bg-[#e6f1fb] text-[#0c447c] dark:bg-[#0c447c]/30 dark:text-[#93c5fd];
+  }
+}

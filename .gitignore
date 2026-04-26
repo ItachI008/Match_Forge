@@ -1,0 +1,109 @@
+# ======================
+# Backend (Spring Boot)
+# ======================
+matchforge-backend/HELP.md
+matchforge-backend/target/
+matchforge-backend/.mvn/wrapper/maven-wrapper.jar
+
+# Keep target inside src if needed
+!matchforge-backend/**/src/main/**/target/
+!matchforge-backend/**/src/test/**/target/
+
+# Ignore secrets
+matchforge-backend/src/main/resources/application.properties
+
+# ======================
+# STS / Eclipse
+# ======================
+matchforge-backend/.apt_generated
+matchforge-backend/.classpath
+matchforge-backend/.factorypath
+matchforge-backend/.project
+matchforge-backend/.settings/
+matchforge-backend/.springBeans
+matchforge-backend/.sts4-cache
+
+# ======================
+# IntelliJ IDEA
+# ======================
+matchforge-backend/.idea/
+matchforge-backend/*.iws
+matchforge-backend/*.iml
+matchforge-backend/*.ipr
+
+# ======================
+# NetBeans
+# ======================
+matchforge-backend/nbproject/private/
+matchforge-backend/nbbuild/
+matchforge-backend/dist/
+matchforge-backend/nbdist/
+matchforge-backend/.nb-gradle/
+matchforge-backend/build/
+
+!matchforge-backend/**/src/main/**/build/
+!matchforge-backend/**/src/test/**/build/
+
+# ======================
+# VS Code
+# ======================
+.vscode/
+
+# ======================
+# Frontend (Next.js)
+# ======================
+matchforge-frontend/node_modules/
+matchforge-frontend/.next/
+matchforge-frontend/.env
+
+# ======================
+# General
+# ======================
+.env
+*.log
+.DS_Store
+
+
+# ======================
+# Frontend (Next.js)
+# ======================
+
+# dependencies
+matchforge-frontend/node_modules/
+matchforge-frontend/.pnp
+matchforge-frontend/.pnp.*
+matchforge-frontend/.yarn/*
+!matchforge-frontend/.yarn/patches
+!matchforge-frontend/.yarn/plugins
+!matchforge-frontend/.yarn/releases
+!matchforge-frontend/.yarn/versions
+
+# testing
+matchforge-frontend/coverage/
+
+# next.js
+matchforge-frontend/.next/
+matchforge-frontend/out/
+
+# production
+matchforge-frontend/build/
+
+# misc
+matchforge-frontend/.DS_Store
+matchforge-frontend/*.pem
+
+# debug
+matchforge-frontend/npm-debug.log*
+matchforge-frontend/yarn-debug.log*
+matchforge-frontend/yarn-error.log*
+matchforge-frontend/.pnpm-debug.log*
+
+# env files
+matchforge-frontend/.env*
+
+# vercel
+matchforge-frontend/.vercel
+
+# typescript
+matchforge-frontend/*.tsbuildinfo
+matchforge-frontend/next-env.d.ts
