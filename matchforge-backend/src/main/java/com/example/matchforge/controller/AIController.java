@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ai")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AIController {
 
     @Autowired
@@ -19,15 +18,21 @@ public class AIController {
     @Autowired
     private ResumeService resumeService;
 
+    // Endpoint for follow‑up questions
+    @PostMapping("/advice")
+    public Map<String, String> getAdvice(@RequestBody Map<String, String> request) {
+        String prompt = request.get("prompt");
+        String advice = groqService.chat(prompt);
+        return Map.of("advice", advice);
+    }
+
+    // Endpoint for initial suggestions
     @PostMapping("/suggestions")
     public Map<String, String> getResumeSuggestions(
             @RequestParam("resume") MultipartFile resumeFile,
             @RequestParam("jobDescription") String jobDescription) throws Exception {
 
-        // Extract text from resume using existing ResumeService
         String resumeText = resumeService.parseResume(resumeFile).getRawText();
-
-        // Build a prompt that asks for specific resume improvements
         String prompt = buildImprovementPrompt(resumeText, jobDescription);
         String advice = groqService.chat(prompt);
         return Map.of("advice", advice);

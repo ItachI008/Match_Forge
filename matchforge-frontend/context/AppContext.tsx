@@ -20,6 +20,7 @@ type Application = {
   score: number;
   status: string;
   appliedDate: string;
+  notes?: string;               // <-- added optional notes
 };
 
 type AppContextType = {
@@ -37,8 +38,9 @@ type AppContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  saveApplication: (company: string, role: string, score: number, status: string) => Promise<void>;
+  saveApplication: (company: string, role: string, score: number, status: string, appliedDate?: string, notes?: string) => Promise<void>;
   updateApplicationStatus: (id: number, status: string) => Promise<void>;
+  updateApplicationNotes: (id: number, notes: string) => Promise<void>;   // <-- added
 };
 
 // ========== Cookie helpers ==========
@@ -136,8 +138,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     removeCookie('token');
   };
 
-  // Save a new application (from match result)
-  const saveApplication = async (company: string, role: string, score: number, status: string) => {
+  // Save a new application (from match result or manual entry)
+  const saveApplication = async (company: string, role: string, score: number, status: string, appliedDate?: string, notes?: string) => {
     if (!token) throw new Error('Not authenticated');
     const res = await fetch('http://localhost:8080/api/applications', {
       method: 'POST',
@@ -150,7 +152,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         role,
         score,
         status,
-        appliedDate: new Date().toISOString(),
+        appliedDate: appliedDate || new Date().toISOString(),
+        notes: notes || '',
       }),
     });
     if (!res.ok) throw new Error('Failed to save application');
@@ -170,9 +173,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setApplications((prev) => prev.map((app) => (app.id === id ? updated : app)));
   };
 
-  // Run match analysis – now stores the job description when passed directly
+  // Update application notes
+  const updateApplicationNotes = async (id: number, notes: string) => {
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(`http://localhost:8080/api/applications/${id}/notes`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ notes }),
+    });
+    if (!res.ok) throw new Error('Failed to update notes');
+    const updated = await res.json();
+    setApplications((prev) => prev.map((app) => (app.id === id ? updated : app)));
+  };
+
+  // Run match analysis – stores the job description when passed directly
   const runAnalysis = async (directJobDescription?: string) => {
-    // If a direct job description is provided, store it in state for future use (e.g., AI Assistant)
     if (directJobDescription) {
       setJobDescription(directJobDescription);
     }
@@ -239,6 +257,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     logout,
     saveApplication,
     updateApplicationStatus,
+    updateApplicationNotes,               // <-- added
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

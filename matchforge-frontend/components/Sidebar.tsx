@@ -1,8 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Upload, FileText, LineChart, MessageSquare, LogOut } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
+import { LayoutDashboard, Upload, FileText, LineChart, MessageSquare, LogOut, ListChecks, FormInput } from 'lucide-react';import { useAppContext } from '@/context/AppContext';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -10,6 +9,8 @@ const navItems = [
   { name: 'Job Description', href: '/job-description', icon: FileText },
   { name: 'Match Results', href: '/match-results', icon: LineChart },
   { name: 'AI Assistant', href: '/ai-assistant', icon: MessageSquare },
+  { name: 'Application Tracker', href: '/applications', icon: ListChecks },
+  { name: 'Manual Entry', href: '/manual-entry', icon: FormInput },
 ];
 
 export function Sidebar() {

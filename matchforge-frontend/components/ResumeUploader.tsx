@@ -1,7 +1,6 @@
-// components/ResumeUploader.tsx
 'use client';
 import { useRef, useState } from 'react';
-import { Upload, FileText } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 export function ResumeUploader({ onUpload }: { onUpload: (file: File) => void }) {
   const [dragActive, setDragActive] = useState(false);
@@ -15,7 +14,9 @@ export function ResumeUploader({ onUpload }: { onUpload: (file: File) => void })
 
   return (
     <div
-      className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${dragActive ? 'border-[var(--emerald)] bg-[var(--emerald)]/5' : 'border-[var(--border)] hover:border-[var(--ink3)]'}`}
+      className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
+        dragActive ? 'border-[var(--emerald)] bg-[var(--emerald)]/5' : 'border-[var(--border)] hover:border-[var(--ink3)]'
+      }`}
       onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
       onDragLeave={() => setDragActive(false)}
       onDrop={(e) => { e.preventDefault(); setDragActive(false); handleFile(e.dataTransfer.files[0]); }}
