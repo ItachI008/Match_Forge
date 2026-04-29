@@ -20,7 +20,7 @@ type Application = {
   score: number;
   status: string;
   appliedDate: string;
-  notes?: string;               // <-- added optional notes
+  notes?: string;
 };
 
 type AppContextType = {
@@ -40,7 +40,8 @@ type AppContextType = {
   logout: () => void;
   saveApplication: (company: string, role: string, score: number, status: string, appliedDate?: string, notes?: string) => Promise<void>;
   updateApplicationStatus: (id: number, status: string) => Promise<void>;
-  updateApplicationNotes: (id: number, notes: string) => Promise<void>;   // <-- added
+  updateApplicationNotes: (id: number, notes: string) => Promise<void>;
+  deleteApplication: (id: number) => Promise<void>;   // <-- added
 };
 
 // ========== Cookie helpers ==========
@@ -138,7 +139,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     removeCookie('token');
   };
 
-  // Save a new application (from match result or manual entry)
+  // Save a new application
   const saveApplication = async (company: string, role: string, score: number, status: string, appliedDate?: string, notes?: string) => {
     if (!token) throw new Error('Not authenticated');
     const res = await fetch('http://localhost:8080/api/applications', {
@@ -189,7 +190,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setApplications((prev) => prev.map((app) => (app.id === id ? updated : app)));
   };
 
-  // Run match analysis – stores the job description when passed directly
+  // Delete application
+  const deleteApplication = async (id: number) => {
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(`http://localhost:8080/api/applications/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Failed to delete application');
+    setApplications((prev) => prev.filter((app) => app.id !== id));
+  };
+
+  // Run match analysis
   const runAnalysis = async (directJobDescription?: string) => {
     if (directJobDescription) {
       setJobDescription(directJobDescription);
@@ -216,9 +228,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('http://localhost:8080/api/match/analyze', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
       if (!res.ok) {
@@ -257,7 +267,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     logout,
     saveApplication,
     updateApplicationStatus,
-    updateApplicationNotes,               // <-- added
+    updateApplicationNotes,
+    deleteApplication,        // <-- added
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -1,16 +1,11 @@
-// app/providers.tsx
 'use client';
-
+import { ThemeProvider } from 'next-themes';
 import { AppProvider } from '@/context/AppContext';
-// Import other providers like ThemeProvider if needed
-// import { ThemeProvider } from 'next-themes';
-import { ReactNode } from 'react';
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AppProvider>
-      {/* Wrap with other providers if they exist */}
-      {children}
-    </AppProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <AppProvider>{children}</AppProvider>
+    </ThemeProvider>
   );
 }

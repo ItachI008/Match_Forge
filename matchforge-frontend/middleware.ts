@@ -1,21 +1,21 @@
+// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+
+const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
   const { pathname } = request.nextUrl;
 
-  const publicRoutes = ['/login', '/register'];
-  const isPublicRoute = publicRoutes.includes(pathname);
-
-  if (!token && !isPublicRoute) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
+  // Allow public routes
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next();
   }
 
-  if (token && isPublicRoute) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Redirect to login if accessing protected route without token
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();

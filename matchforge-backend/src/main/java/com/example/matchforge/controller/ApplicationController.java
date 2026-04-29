@@ -6,6 +6,8 @@ import com.example.matchforge.model.User;
 import com.example.matchforge.repository.ApplicationRepository;
 import com.example.matchforge.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +18,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/applications")
-@CrossOrigin(origins = "http://localhost:3000")
 public class ApplicationController {
 
     @Autowired
@@ -28,34 +29,56 @@ public class ApplicationController {
     @GetMapping
     public List<ApplicationResponseDTO> getUserApplications(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepo.findByEmail(userDetails.getUsername());
-        List<JobApplication> apps = appRepo.findByUser(user);
-        return apps.stream()
+        return appRepo.findByUser(user).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @PostMapping
-    public JobApplication addApplication(@RequestBody JobApplication app,
-                                         @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<JobApplication> addApplication(@RequestBody JobApplication app,
+                                                         @AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepo.findByEmail(userDetails.getUsername());
         app.setUser(user);
-        return appRepo.save(app);
+        JobApplication saved = appRepo.save(app);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public JobApplication updateStatus(@PathVariable Long id,
-                                       @RequestParam String status) {
-        JobApplication app = appRepo.findById(id).orElseThrow();
+    public ResponseEntity<JobApplication> updateStatus(@PathVariable Long id,
+                                                       @RequestParam String status,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+        JobApplication app = appRepo.findById(id).orElse(null);
+        if (app == null) return ResponseEntity.notFound().build();
+        if (!app.getUser().getEmail().equals(userDetails.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         app.setStatus(status);
-        return appRepo.save(app);
+        return ResponseEntity.ok(appRepo.save(app));
     }
 
     @PutMapping("/{id}/notes")
-    public JobApplication updateNotes(@PathVariable Long id,
-                                      @RequestBody Map<String, String> payload) {
-        JobApplication app = appRepo.findById(id).orElseThrow();
+    public ResponseEntity<JobApplication> updateNotes(@PathVariable Long id,
+                                                      @RequestBody Map<String, String> payload,
+                                                      @AuthenticationPrincipal UserDetails userDetails) {
+        JobApplication app = appRepo.findById(id).orElse(null);
+        if (app == null) return ResponseEntity.notFound().build();
+        if (!app.getUser().getEmail().equals(userDetails.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         app.setNotes(payload.get("notes"));
-        return appRepo.save(app);
+        return ResponseEntity.ok(appRepo.save(app));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteApplication(@PathVariable Long id,
+                                               @AuthenticationPrincipal UserDetails userDetails) {
+        JobApplication app = appRepo.findById(id).orElse(null);
+        if (app == null) return ResponseEntity.notFound().build();
+        if (!app.getUser().getEmail().equals(userDetails.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Unauthorized"));
+        }
+        appRepo.deleteById(id);
+        return ResponseEntity.ok().body(Map.of("message", "Deleted successfully"));
     }
 
     private ApplicationResponseDTO convertToDTO(JobApplication app) {

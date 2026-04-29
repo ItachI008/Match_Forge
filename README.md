@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ MatchForge AI
+# ⚡ MatchForge
 
 ### AI-Powered Resume & Job Match Platform
 

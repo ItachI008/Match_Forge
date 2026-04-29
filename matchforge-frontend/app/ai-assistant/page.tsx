@@ -4,46 +4,45 @@ import { useAppContext } from '@/context/AppContext';
 import { useState } from 'react';
 
 export default function AIAssistantPage() {
-  const { resumeFile, jobDescription, token } = useAppContext();  // ← added token
+  const { resumeFile, jobDescription, token } = useAppContext();
   const [loading, setLoading] = useState(false);
   const [advice, setAdvice] = useState<string | null>(null);
   const [followUp, setFollowUp] = useState('');
   const [conversation, setConversation] = useState<{ role: string; content: string }[]>([]);
 
-  const getSuggestions = async () => {
-    if (!resumeFile || !jobDescription) {
-      alert('Please upload a resume and job description first.');
-      return;
-    }
+ const getSuggestions = async () => {
+  if (!resumeFile || !jobDescription) {
+    alert('Please upload a resume and job description first.');
+    return;
+  }
 
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('resume', resumeFile);
-    formData.append('jobDescription', jobDescription);
+  setLoading(true);
+  const formData = new FormData();
+  formData.append('resume', resumeFile);
+  formData.append('jobDescription', jobDescription);
 
-    try {
-      const res = await fetch('http://localhost:8080/api/ai/suggestions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,   // ← token now defined
-        },
-        body: formData,
-      });
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`HTTP ${res.status}: ${errorText}`);
-      }
-      const data = await res.json();
-      const aiAdvice = data.advice;
-      setAdvice(aiAdvice);
-      setConversation([{ role: 'assistant', content: aiAdvice }]);
-    } catch (err) {
-      console.error(err);
-      setAdvice('Failed to generate advice. Please try again.');
-    } finally {
-      setLoading(false);
+  try {
+    const res = await fetch('http://localhost:8080/api/ai/suggestions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData,
+    });
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errorText}`);
     }
-  };
+    const data = await res.json();
+    let aiAdvice = data.advice;
+    aiAdvice = aiAdvice.replace(/^\*\s+/gm, '• ');
+    setAdvice(aiAdvice);
+    setConversation([]);  // ← prevent repetition of initial advice in chat
+  } catch (err) {
+    console.error(err);
+    setAdvice('Failed to generate advice. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const askFollowUp = async () => {
     if (!followUp.trim()) return;
@@ -65,13 +64,14 @@ Give a helpful, concise answer about improving the resume. Be specific.
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,   // ← also needed here
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ prompt }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      const assistantReply = data.advice;
+      let assistantReply = data.advice;
+      assistantReply = assistantReply.replace(/^\*\s+/gm, '• ');
       setConversation(prev => [...prev, { role: 'assistant', content: assistantReply }]);
     } catch (err) {
       console.error(err);
@@ -94,7 +94,7 @@ Give a helpful, concise answer about improving the resume. Be specific.
             </button>
             {(!resumeFile || !jobDescription) && (
               <p className="text-sm text-[var(--ink3)] mt-4">
-                ⚠️ Please upload a resume and job description first (using the Upload and Job Description pages).
+                 Please upload a resume and job description first.
               </p>
             )}
           </div>
@@ -104,8 +104,10 @@ Give a helpful, concise answer about improving the resume. Be specific.
           <>
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 mb-6">
               <h2 className="text-lg font-semibold mb-3">Your Personalized Resume Advice</h2>
-              <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
-                {advice}
+              <div className="space-y-3">
+                {advice.split('\n').map((line, idx) => (
+                  line.trim() && <p key={idx} className="text-sm leading-relaxed">{line}</p>
+                ))}
               </div>
             </div>
 

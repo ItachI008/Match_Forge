@@ -22,17 +22,20 @@ interface DashboardInsightsProps {
 }
 
 export function DashboardInsights({ applications, latestAnalysis }: DashboardInsightsProps) {
-  // Compute stats
   const totalApps = applications.length;
+  
+  // Updated status mappings to match Application Tracker
   const applied = applications.filter(app => app.status === 'Applied').length;
-  const interviews = applications.filter(app => app.status === 'Interview').length;
-  const offers = applications.filter(app => app.status === 'Offer').length;
+  const interviews = applications.filter(app => app.status === 'Interview' || app.status === 'Assessment').length;
+  const offers = applications.filter(app => app.status === 'Offer' || app.status === 'Accepted').length;
   const rejected = applications.filter(app => app.status === 'Rejected').length;
+  // Ghosted is not used in funnel but you can add if needed
+  const ghosted = applications.filter(app => app.status === 'Ghosted').length;
 
   const offerRate = totalApps > 0 ? Math.round((offers / totalApps) * 100) : 0;
   const interviewRate = totalApps > 0 ? Math.round(((interviews + offers) / totalApps) * 100) : 0;
 
-  // Top companies by score
+  // Top companies by score (still works)
   const topCompanies = [...applications]
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
@@ -52,17 +55,23 @@ export function DashboardInsights({ applications, latestAnalysis }: DashboardIns
             <span className="font-mono">{applied}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>🎯 Interviews</span>
+            <span>🎯 Interviews (incl. Assessment)</span>
             <span className="font-mono">{interviews}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>🏆 Offers</span>
+            <span>🏆 Offers / Accepted</span>
             <span className="font-mono font-bold text-[var(--emerald)]">{offers}</span>
           </div>
           <div className="flex justify-between items-center">
             <span>❌ Rejected</span>
             <span className="font-mono text-[var(--rose)]">{rejected}</span>
           </div>
+          {ghosted > 0 && (
+            <div className="flex justify-between items-center text-gray-500">
+              <span>👻 Ghosted</span>
+              <span className="font-mono">{ghosted}</span>
+            </div>
+          )}
         </div>
         <div className="mt-4 space-y-1">
           <div className="flex justify-between text-xs">
@@ -87,7 +96,7 @@ export function DashboardInsights({ applications, latestAnalysis }: DashboardIns
         <h3 className="text-sm font-semibold text-[var(--ink3)] uppercase tracking-wide mb-3">Top Matches</h3>
         {topCompanies.length > 0 ? (
           <div className="space-y-3">
-            {topCompanies.map((app, idx) => (
+            {topCompanies.map((app) => (
               <div key={app.id} className="flex justify-between items-center">
                 <div>
                   <span className="font-medium">{app.company}</span>

@@ -22,7 +22,7 @@ export function TrendChart({ applications }: { applications: Application[] }) {
       const dateB = new Date(b.appliedDate + ' 2024');
       return dateA.getTime() - dateB.getTime();
     });
-    return sorted.map(app => ({ name: app.company.slice(0, 5), score: app.score }));
+    return sorted.map(app => ({ name: app.company.slice(0, 10), score: app.score }));
   }, [applications]);
 
   return (

@@ -4,12 +4,9 @@ import './globals.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        {/* This makes the context available to all client components */}
-        <Providers> 
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

@@ -41,9 +41,14 @@ export default function LoginPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 mb-6 border rounded bg-[var(--paper)] text-[var(--ink)]"
+            className="w-full p-2 mb-4 border rounded bg-[var(--paper)] text-[var(--ink)]"
             required
           />
+          <div className="text-right mb-4">
+            <Link href="/forgot-password" className="text-sm text-[var(--accent)] hover:underline">
+              Forgot password?
+            </Link>
+          </div>
           <button type="submit" className="btn-primary btn w-full">Login</button>
         </form>
         <p className="text-center text-sm text-[var(--ink3)] mt-4">

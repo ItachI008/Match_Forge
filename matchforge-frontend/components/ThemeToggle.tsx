@@ -1,6 +1,5 @@
 // components/ThemeToggle.tsx
 'use client';
-
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
@@ -11,13 +10,12 @@ export function ThemeToggle() {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return null; // avoid hydration mismatch
+  if (!mounted) return null;
 
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       className="p-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--ink)] hover:bg-[var(--paper)] transition-all"
-      aria-label="Toggle theme"
     >
       {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
     </button>
