@@ -1,23 +1,29 @@
-# Use an official JDK 17 runtime as base image
-FROM openjdk:17-jdk-slim
+# Use Eclipse Temurin (official OpenJDK distribution) as base
+FROM eclipse-temurin:17-jdk-slim AS builder
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the Maven wrapper and source code
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-COPY src src
+# Copy the source code
+COPY . .
 
 # Make the Maven wrapper executable
 RUN chmod +x mvnw
 
-# Package the application (skip tests for speed)
+# Build the application (skip tests to speed up)
 RUN ./mvnw clean package -DskipTests
 
-# Expose the port your app listens on
+# Use a lightweight JDK for runtime
+FROM eclipse-temurin:17-jre-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the jar from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose the port
 EXPOSE 8080
 
-# Run the Spring Boot application
-CMD ["java", "-jar", "target/*.jar"]
+# Run the application
+CMD ["java", "-jar", "app.jar"]
