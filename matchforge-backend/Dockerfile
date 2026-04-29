@@ -1,28 +1,32 @@
-# Use Eclipse Temurin (official OpenJDK distribution) as base
-FROM eclipse-temurin:17-jdk-slim AS builder
+# Build stage
+FROM amazoncorretto:17-alpine AS builder
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the source code
-COPY . .
+# Copy Maven wrapper and source code
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
 
-# Make the Maven wrapper executable
+# Make the wrapper executable
 RUN chmod +x mvnw
 
-# Build the application (skip tests to speed up)
+# Download dependencies (cached)
+RUN ./mvnw dependency:go-offline -B
+
+# Copy source and build
+COPY src src
 RUN ./mvnw clean package -DskipTests
 
-# Use a lightweight JDK for runtime
-FROM eclipse-temurin:17-jre-slim
+# Runtime stage
+FROM amazoncorretto:17-alpine
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the jar from the builder stage
+# Copy the built jar from the builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Expose the port
+# Expose port
 EXPOSE 8080
 
 # Run the application
