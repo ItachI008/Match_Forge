@@ -43,7 +43,7 @@ type AppContextType = {
 };
 
 // ========== Environment variable for backend URL ==========
-const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 // ========== Cookie helpers ==========
 function setCookie(name: string, value: string, days: number = 7) {

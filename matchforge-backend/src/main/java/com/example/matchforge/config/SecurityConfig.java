@@ -48,16 +48,20 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {})  // rely on CorsConfig bean
+            .cors(cors -> cors.disable()) // CorsConfig handles it
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+                // Explicitly permit all authentication endpoints
+                .requestMatchers("/api/auth/send-otp", "/api/auth/verify-register", "/api/auth/login",
+                                 "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+                .requestMatchers("/error", "/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .headers(headers -> headers.frameOptions(frame -> frame.disable()));
+
         return http.build();
     }
 }

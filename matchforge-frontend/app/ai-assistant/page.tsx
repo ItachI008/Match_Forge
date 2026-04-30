@@ -3,6 +3,8 @@ import { Layout } from '@/components/Layout';
 import { useAppContext } from '@/context/AppContext';
 import { useState } from 'react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+
 export default function AIAssistantPage() {
   const { resumeFile, jobDescription, token } = useAppContext();
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ export default function AIAssistantPage() {
   formData.append('jobDescription', jobDescription);
 
   try {
-    const res = await fetch('http://localhost:8080/api/ai/suggestions', {
+    const res = await fetch(`${API_BASE}/ai/suggestions`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData,
@@ -60,7 +62,7 @@ Give a helpful, concise answer about improving the resume. Be specific.
     `;
 
     try {
-      const res = await fetch('http://localhost:8080/api/ai/advice', {
+      const res = await fetch(`${API_BASE}/ai/advice`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
