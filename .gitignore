@@ -60,6 +60,7 @@ matchforge-frontend/.env
 # General
 # ======================
 .env
+.env.local
 *.log
 .DS_Store
 
