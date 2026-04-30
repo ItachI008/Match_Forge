@@ -1,12 +1,8 @@
-// components/MatchScoreCard.tsx
+'use client';
+
 interface MatchScoreCardProps {
   score: number;
-  breakdown: {
-    skills: number;
-    experience: number;
-    keywords: number;
-    projects: number;
-  };
+  breakdown: Record<string, number>;
 }
 
 export function MatchScoreCard({ score, breakdown }: MatchScoreCardProps) {
