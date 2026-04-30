@@ -9,10 +9,29 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen?logo=spring)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue?logo=postgresql)](https://www.postgresql.org/)
 [![Groq](https://img.shields.io/badge/Groq-Llama%203.3-orange)](https://console.groq.com/)
+[![SendGrid](https://img.shields.io/badge/SendGrid-Email%20API-0696D7?logo=sendgrid)](https://sendgrid.com/)
 
 > **Analyze your resume against any job description, get an AI-powered match score, discover missing skills, manually log job applications, and track every stage of your job hunt — all in one place.**
 
+**🌐 Live Demo:** [https://match-forge-wsr2.vercel.app](https://match-forge-wsr2.vercel.app)
+
 </div>
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Using the App](#-using-the-app)
+- [API Reference](#-api-reference)
+- [Deployment](#-deployment)
+- [Troubleshooting](#-troubleshooting)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
@@ -28,6 +47,7 @@
 | 📊 **Dashboard** | Real stats: applications, avg score, interviews, offer trends |
 | 💾 **Persistent Storage** | PostgreSQL — all user data saved across sessions |
 | 🔐 **Authentication** | Email + password with JWT (cookie-based) |
+| ✉️ **Email Notifications** | OTP verification & password reset via SendGrid API |
 | 🌗 **Dark / Light Mode** | Fully themable via `next-themes` |
 | 🧠 **AI Assistant** | Ask follow-up questions to improve your resume |
 
@@ -40,49 +60,6 @@
 
 ---
 
-## 📋 Application Form — Manual Job Entry
-
-No job description to analyze? No problem. The **Application Form** lets you log any job opportunity manually so nothing falls through the cracks.
-
-**Fields supported:**
-
-| Field | Description |
-|---|---|
-| 🏢 Company Name | The company you applied to |
-| 💼 Job Title / Role | Position you're targeting |
-| 🔗 Job URL | Link to the original posting *(optional)* |
-| 📅 Applied Date | When you submitted the application |
-| 📌 Status | Current stage — `Saved`, `Applied`, `Interview`, `Offer`, `Rejected` |
-| 📝 Notes | Personal notes, recruiter details, interview prep |
-| 🏷️ Tags | Custom labels — e.g. `remote`, `startup`, `high-priority` |
-
-> Applications added via the form are stored in the same PostgreSQL database and appear alongside AI-analyzed applications in the tracker and dashboard stats.
-
----
-
-## 🗂️ Application Tracker
-
-The **Application Tracker** gives you a unified view of your entire job hunt — whether an application was created from an AI match analysis or entered manually via the form.
-
-**Tracker capabilities:**
-
-- **Kanban-style status pipeline** — `Saved → Applied → Interview → Offer / Rejected`
-- **Inline status updates** — move an application to the next stage with a single click
-- **Search & filter** — filter by company, role, status, or custom tags
-- **Sort options** — by date applied, match score, or company name
-- **Quick actions** — edit notes, update tags, or delete an entry directly from the list
-- **Match score badge** — AI-analyzed applications display their score alongside manual entries
-- **Dashboard sync** — all tracker data feeds the stats and trend chart on the dashboard in real time
-
-**Application status flow:**
-
-```
-Saved ──► Applied ──► Interview ──► Offer
-                  └──────────────► Rejected
-```
-
----
-
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
@@ -90,7 +67,8 @@ Saved ──► Applied ──► Interview ──► Offer
 | **Frontend** | Next.js 14 (App Router), TypeScript, Tailwind CSS, next-themes, Recharts |
 | **Backend** | Spring Boot 3.2, Spring Security, JWT, Hibernate |
 | **AI / LLM** | Groq API — Llama 3.3-70B / Llama 3.1-8B |
-| **Database** | PostgreSQL 14+ (local or cloud) |
+| **Database** | PostgreSQL 14+ (local or cloud via Neon) |
+| **Email Service** | SendGrid HTTP API (no SMTP restrictions) |
 | **Build Tools** | Maven (backend), npm (frontend) |
 
 ---
@@ -99,50 +77,34 @@ Saved ──► Applied ──► Interview ──► Offer
 
 ```
 matchforge/
-├── matchforge-frontend/                  # Next.js 14 frontend
-│   ├── app/                              # App Router pages
-│   │   ├── dashboard/                    # Stats & trend charts
-│   │   ├── upload/                       # Resume upload page
-│   │   ├── job-description/              # Job posting input page
-│   │   ├── match-results/                # Score & analysis results
-│   │   ├── application-form/             # ★ NEW — Manual job entry form
-│   │   ├── application-tracker/          # ★ NEW — Track all applications
-│   │   ├── ai-assistant/                 # AI follow-up chat
-│   │   ├── login/                        # Authentication
-│   │   └── register/                     # New user registration
-│   ├── components/
-│   │   ├── ApplicationForm/              # ★ NEW — Form component & validation
-│   │   ├── ApplicationTracker/           # ★ NEW — Tracker table, filters, kanban
-│   │   └── ...                           # Other reusable UI components
-│   ├── context/                          # AppContext (auth, analysis, applications)
-│   ├── lib/                              # Mock data (fallback / dev mode)
-│   └── public/                           # Static assets
+├── matchforge-frontend/          # Next.js 14 frontend
+│   ├── app/                      # App Router pages
+│   │   ├── dashboard/            # Stats & trend charts
+│   │   ├── upload/               # Resume upload page
+│   │   ├── job-description/      # Job posting input page
+│   │   ├── match-results/        # Score & analysis results
+│   │   ├── application-form/     # Manual job entry form
+│   │   ├── application-tracker/  # Track all applications
+│   │   ├── ai-assistant/         # AI follow-up chat
+│   │   ├── login/ & register/    # Authentication
+│   │   └── ...                   # Forgot password, reset, etc.
+│   ├── components/               # Reusable UI components
+│   ├── context/                  # AppContext (auth, analysis, apps)
+│   ├── lib/                      # API client & utilities
+│   └── public/                   # Static assets
 │
-└── matchforge-backend/                   # Spring Boot backend
-    ├── src/
-    │   └── main/
-    │       ├── java/
-    │       │   └── com/matchforge/
-    │       │       ├── controllers/
-    │       │       │   ├── ApplicationController.java   # ★ NEW — CRUD for applications
-    │       │       │   └── ...
-    │       │       ├── services/
-    │       │       │   ├── ApplicationService.java      # ★ NEW — Business logic
-    │       │       │   ├── GroqService.java
-    │       │       │   └── ...
-    │       │       ├── models/
-    │       │       │   ├── Application.java             # ★ NEW — JPA entity (+ tags, notes)
-    │       │       │   └── ...
-    │       │       ├── repositories/
-    │       │       │   ├── ApplicationRepository.java   # ★ NEW — Spring Data repo
-    │       │       │   └── ...
-    │       │       └── security/
-    │       └── resources/
-    │           └── application.properties
+└── matchforge-backend/           # Spring Boot backend
+    ├── src/main/java/com/matchforge/
+    │   ├── controllers/          # REST endpoints
+    │   ├── services/             # Business logic (Groq, SendGrid, JWT)
+    │   ├── models/               # JPA entities (User, Application, etc.)
+    │   ├── repositories/         # Spring Data JPA
+    │   ├── security/             # JWT filter, security config
+    │   └── config/               # CORS, async, scheduling config
+    ├── src/main/resources/
+    │   └── application.properties
     └── pom.xml
 ```
-
-> ★ marks files and folders added for the Application Form & Tracker features.
 
 ---
 
@@ -152,8 +114,9 @@ matchforge/
 
 - **Node.js** 18+ and npm
 - **Java** 17+ and Maven
-- **PostgreSQL** 14+ *(or H2 for quick testing)*
+- **PostgreSQL** 14+ *(or use Neon for a free cloud DB)*
 - **Groq API key** — free tier at [console.groq.com](https://console.groq.com)
+- **SendGrid API key** — free tier at [sendgrid.com](https://sendgrid.com)
 
 ---
 
@@ -161,7 +124,7 @@ matchforge/
 
 ```bash
 git clone https://github.com/ItachI008/Match_Forge.git
-cd matchforge-ai
+cd matchforge
 ```
 
 ---
@@ -181,21 +144,38 @@ GRANT ALL PRIVILEGES ON DATABASE matchforge TO matchforge_user;
 Edit `matchforge-backend/src/main/resources/application.properties`:
 
 ```properties
+# Server
+server.port=8080
+
 # PostgreSQL
 spring.datasource.url=jdbc:postgresql://localhost:5432/matchforge
 spring.datasource.username=matchforge_user
 spring.datasource.password=matchforge123
 spring.jpa.hibernate.ddl-auto=update
+spring.jpa.open-in-view=false
 
 # JWT
 jwt.secret=your_jwt_secret_key
-jwt.expiration=86400000
+jwt.expiration=604800000
 
 # Groq API
 groq.api.key=your_groq_api_key
+
+# SendGrid
+sendgrid.api.key=your_sendgrid_api_key
+sendgrid.from.email=verified@yourdomain.com
+
+# OTP expiry (5 minutes)
+otp.expiry=300000
+
+# Frontend URL
+frontend.url=http://localhost:3000
+
+# CORS
+cors.allowed.origin=http://localhost:3000
 ```
 
-> 💡 **No PostgreSQL?** Comment out the PostgreSQL block and uncomment the H2 block in `application.properties` for quick local testing.
+> 💡 **No PostgreSQL locally?** You can use a free [Neon](https://neon.tech) cloud database — just replace the datasource URL.
 
 #### 2.3 — Run the Backend
 
@@ -240,50 +220,145 @@ Open **http://localhost:3000**
 
 ---
 
-### 4. Using the App
+## 📖 Using the App
 
-**AI-Powered Flow**
-1. **Register** or **Login**
+### AI-Powered Flow
+
+1. **Register or Login**
 2. **Upload Resume** — PDF or DOCX
-3. **Paste Job Description** → click **"Analyze Match"**
+3. **Paste Job Description** → click "Analyze Match"
 4. **View Match Results** — score, skill gaps, improvement suggestions
 5. **Save to Tracker** — adds the result to your Application Tracker
 
-**Manual Entry Flow**
+### Manual Entry Flow
+
 1. Navigate to **Application Form**
 2. Fill in company, role, status, notes, and tags
 3. Click **"Save Application"** — immediately visible in the tracker
 
-**Track & Manage**
-1. Open **Application Tracker** to see all applications in one view
-2. Update status as you progress through each stage
-3. Use **Search / Filter / Sort** to focus on what matters
-4. Check the **Dashboard** for stats, score trends, and pipeline overview
-5. Use the **AI Assistant** anytime for resume improvement tips
+### Track & Manage
+
+- Open **Application Tracker** to see all applications in one view
+- Update status as you progress through each stage
+- Use **Search / Filter / Sort** to focus on what matters
+- Check the **Dashboard** for stats, score trends, and pipeline overview
+- Use the **AI Assistant** anytime for resume improvement tips
+
+### Password Reset & OTP
+
+OTP for registration and password reset are sent via **SendGrid HTTP API** — works reliably on all cloud hosts including Render (no SMTP port restrictions).
 
 ---
 
-## 🌐 API Reference — Application Endpoints
+## 🌐 API Reference
+
+All endpoints require `Authorization: Bearer <token>` header, issued automatically after login.
+
+### Authentication
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/applications` | Fetch all applications for the logged-in user |
-| `POST` | `/api/applications` | Create a new application (manual or from AI result) |
-| `PUT` | `/api/applications/{id}` | Update application fields (status, notes, tags, etc.) |
-| `DELETE` | `/api/applications/{id}` | Delete an application |
-| `GET` | `/api/applications/{id}` | Fetch a single application by ID |
+| `POST` | `/api/auth/register` | Register a new user |
+| `POST` | `/api/auth/login` | Login and receive JWT |
+| `POST` | `/api/auth/verify-otp` | Verify email OTP |
+| `POST` | `/api/auth/forgot-password` | Send password reset email |
+| `POST` | `/api/auth/reset-password` | Reset password with token |
 
-> All endpoints require `Authorization: Bearer <token>` header, issued automatically after login.
+### Applications
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/applications` | Fetch all applications for logged-in user |
+| `POST` | `/api/applications` | Create a new application |
+| `GET` | `/api/applications/{id}` | Fetch a single application by ID |
+| `PUT` | `/api/applications/{id}` | Update application fields |
+| `DELETE` | `/api/applications/{id}` | Delete an application |
+
+---
+
+## 🐳 Deployment
+
+### Backend — Render
+
+#### 1. Package the application
+
+```bash
+cd matchforge-backend
+
+# macOS / Linux
+./mvnw clean package -DskipTests
+
+# Windows
+mvnw.cmd clean package -DskipTests
+```
+
+#### 2. Make `mvnw` executable (required for Render)
+
+```bash
+git update-index --chmod=+x mvnw
+git add .
+git commit -m "make mvnw executable"
+git push origin main
+```
+
+#### 3. Create a Web Service on Render
+
+- Go to [render.com](https://render.com) → **New → Web Service**
+- Connect your GitHub repo
+- Set **Build Command:** `./mvnw clean package -DskipTests`
+- Set **Start Command:** `java -jar target/*.jar`
+
+#### 4. Set Environment Variables on Render
+
+| Key | Value |
+|---|---|
+| `DB_PASSWORD` | Your Neon DB password |
+| `JWT_SECRET` | A long random secret string |
+| `SENDGRID_API_KEY` | Your SendGrid API key |
+| `GROQ_API` | Your Groq API key |
+| `FRONTEND_URL` | Your deployed frontend URL |
+| `CORS_ALLOWED_ORIGIN` | Your deployed frontend URL |
+
+---
+
+### Frontend — Vercel
+
+1. Push the repo to GitHub
+2. Import the project on [Vercel](https://vercel.com)
+3. Set the root directory to `matchforge-frontend`
+4. Add the environment variable:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-render-backend-url/api
+```
+
+**Live URL:** [https://match-forge-wsr2.vercel.app](https://match-forge-wsr2.vercel.app)
+
+---
+
+## 🔧 Troubleshooting
+
+| Issue | Fix |
+|---|---|
+| `403 Forbidden` on API calls | Ensure JWT token is valid and not expired — try logging out and back in |
+| Emails not delivered | Check SendGrid Activity Feed; verify sender email is verified in SendGrid dashboard |
+| OTP / reset emails going to spam | Mark as "Not Spam" in Gmail; use a custom domain sender for production |
+| `500` on forgot-password | Ensure `@Transactional` is on `storeToken()` in `PasswordResetService` |
+| Applications not appearing in tracker | Confirm backend `/api/applications` is reachable and JWT hasn't expired |
+| Groq model deprecated | Update model name in `GroqService.java` to latest from [Groq console](https://console.groq.com) |
+| Port 8080 already in use | Kill the conflicting process or change `server.port` in `application.properties` |
+| Render build fails | Ensure `mvnw` is executable — run `git update-index --chmod=+x mvnw` |
+| Cold starts on Render | Expected on free tier — Render sleeps after 15 min of inactivity |
 
 ---
 
 ## 🧪 Testing
 
 ```bash
-# Backend unit tests
+# Backend tests
 cd matchforge-backend
-./mvnw test                  # macOS / Linux
-mvnw.cmd test                # Windows
+./mvnw test           # macOS / Linux
+mvnw.cmd test         # Windows
 
 # Frontend tests
 cd matchforge-frontend
@@ -292,72 +367,13 @@ npm run test
 
 ---
 
-## 🗄️ Database Management
-
-| Tool | Access |
-|---|---|
-| H2 Console *(if enabled)* | http://localhost:8080/h2-console |
-| PostgreSQL CLI | `psql -U matchforge_user -d matchforge` |
-| pgAdmin | Connect to `localhost:5432` |
-
----
-
-## 🐳 Deployment
-
-### Backend — Render / Railway
-
-```bash
-cd matchforge-backend
-
-# macOS / Linux
-./mvnw clean package
-
-# Windows
-mvnw.cmd clean package
-
-# JAR output: target/matchforge-backend-*.jar
-```
-
-Set these environment variables on your hosting platform:
-
-```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:<port>/<db>
-SPRING_DATASOURCE_USERNAME=your_db_user
-SPRING_DATASOURCE_PASSWORD=your_db_password
-JWT_SECRET=your_jwt_secret
-JWT_EXPIRATION=86400000
-GROQ_API_KEY=your_groq_api_key
-```
-
-### Frontend — Vercel
-
-1. Push the repo to GitHub
-2. Import the project on [Vercel](https://vercel.com)
-3. Set the environment variable:
-
-```env
-NEXT_PUBLIC_API_URL=https://your-deployed-backend-url/api
-```
-
----
-
-## 📌 Troubleshooting
-
-| Issue | Fix |
-|---|---|
-| **403 Forbidden on match analysis or application save** | Ensure `Authorization: Bearer <token>` is sent — handled automatically after login. |
-| **Applications not appearing in tracker** | Check that the backend `/api/applications` endpoint is reachable and the JWT token hasn't expired. |
-| **Tags not saving** | Confirm the `Application` entity has the `tags` field mapped; run `spring.jpa.hibernate.ddl-auto=update` to auto-migrate. |
-| **Groq model deprecated** | Update the model name in `GroqService.java` to the latest from [Groq's console](https://console.groq.com). |
-| **Port 8080 already in use** | Kill the conflicting process or change `server.port` in `application.properties`. |
-
----
-
 ## 🔮 Roadmap
 
+- [x] AI-powered resume & job description match analysis
 - [x] Application Form — manual job entry with company, role, status, notes & tags
 - [x] Application Tracker — unified view with status pipeline and filtering
-- [ ] OTP verification during signup (email confirmation)
+- [x] OTP verification during signup via SendGrid
+- [x] Password reset via email link
 - [ ] Google OAuth one-click login
 - [ ] Export tracker data as PDF / CSV
 - [ ] Resume version history with improvement tracking
@@ -369,7 +385,7 @@ NEXT_PUBLIC_API_URL=https://your-deployed-backend-url/api
 
 ## 🤝 Contributing
 
-Pull requests are welcome! For major changes, please **open an issue first** to discuss what you'd like to change.
+Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
 
 ```bash
 git checkout -b feature/your-feature-name
@@ -379,18 +395,19 @@ git push origin feature/your-feature-name
 
 ---
 
-## 📄 License
-
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
-
----
-
 ## 🙏 Acknowledgements
 
 - [Groq](https://groq.com) — blazing fast LLM inference
+- [SendGrid](https://sendgrid.com) — reliable email delivery via HTTP API
 - [Next.js](https://nextjs.org) & [Tailwind CSS](https://tailwindcss.com)
 - [Spring Boot](https://spring.io/projects/spring-boot)
-- [PostgreSQL](https://www.postgresql.org)
+- [PostgreSQL](https://www.postgresql.org) & [Neon](https://neon.tech)
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
@@ -398,6 +415,6 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
 Built with ❤️ to help job seekers land their dream roles faster.
 
-**[Open an Issue](https://github.com/ItachI008/Match_Forge/issues)** · **[View on GitHub](https://github.com/ItachI008/Match_Forge)**
+**[Live Demo](https://match-forge-wsr2.vercel.app)** · **[Report a Bug](https://github.com/ItachI008/Match_Forge/issues)** · **[Request a Feature](https://github.com/ItachI008/Match_Forge/issues)**
 
 </div>
