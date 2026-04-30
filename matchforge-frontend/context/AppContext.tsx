@@ -24,14 +24,12 @@ type Application = {
 };
 
 type AppContextType = {
-  // Resume & analysis
   resumeFile: File | null;
   jobDescription: string;
   analysisResult: AnalysisResult | null;
   setResumeFile: (file: File | null) => void;
   setJobDescription: (jd: string) => void;
   runAnalysis: (jd?: string) => Promise<void>;
-  // Auth & applications
   token: string | null;
   loading: boolean;
   applications: Application[];
@@ -41,8 +39,11 @@ type AppContextType = {
   saveApplication: (company: string, role: string, score: number, status: string, appliedDate?: string, notes?: string) => Promise<void>;
   updateApplicationStatus: (id: number, status: string) => Promise<void>;
   updateApplicationNotes: (id: number, notes: string) => Promise<void>;
-  deleteApplication: (id: number) => Promise<void>;   // <-- added
+  deleteApplication: (id: number) => Promise<void>;
 };
+
+// ========== Environment variable for backend URL ==========
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
 // ========== Cookie helpers ==========
 function setCookie(name: string, value: string, days: number = 7) {
@@ -66,17 +67,13 @@ function getCookie(name: string): string | null {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  // Resume & job description state
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState('');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-
-  // Auth state
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
 
-  // Check for existing token on mount
   useEffect(() => {
     const checkAuth = async () => {
       const storedToken = getCookie('token');
@@ -89,10 +86,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     checkAuth();
   }, []);
 
-  // Fetch applications using token
   const fetchApplications = async (authToken: string) => {
     try {
-      const res = await fetch('http://localhost:8080/api/applications', {
+      const res = await fetch(`${API_BASE}/applications`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       if (res.ok) {
@@ -104,9 +100,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Login
   const login = async (email: string, password: string) => {
-    const res = await fetch('http://localhost:8080/api/auth/login', {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -122,9 +117,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Register
   const register = async (email: string, password: string) => {
-    const res = await fetch('http://localhost:8080/api/auth/register', {
+    const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -132,17 +126,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!res.ok) throw new Error('Registration failed');
   };
 
-  // Logout
   const logout = () => {
     setToken(null);
     setApplications([]);
     removeCookie('token');
   };
 
-  // Save a new application
   const saveApplication = async (company: string, role: string, score: number, status: string, appliedDate?: string, notes?: string) => {
     if (!token) throw new Error('Not authenticated');
-    const res = await fetch('http://localhost:8080/api/applications', {
+    const res = await fetch(`${API_BASE}/applications`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -162,10 +154,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setApplications((prev) => [...prev, newApp]);
   };
 
-  // Update application status
   const updateApplicationStatus = async (id: number, status: string) => {
     if (!token) throw new Error('Not authenticated');
-    const res = await fetch(`http://localhost:8080/api/applications/${id}?status=${status}`, {
+    const res = await fetch(`${API_BASE}/applications/${id}?status=${status}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -174,10 +165,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setApplications((prev) => prev.map((app) => (app.id === id ? updated : app)));
   };
 
-  // Update application notes
   const updateApplicationNotes = async (id: number, notes: string) => {
     if (!token) throw new Error('Not authenticated');
-    const res = await fetch(`http://localhost:8080/api/applications/${id}/notes`, {
+    const res = await fetch(`${API_BASE}/applications/${id}/notes`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -190,10 +180,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setApplications((prev) => prev.map((app) => (app.id === id ? updated : app)));
   };
 
-  // Delete application
   const deleteApplication = async (id: number) => {
     if (!token) throw new Error('Not authenticated');
-    const res = await fetch(`http://localhost:8080/api/applications/${id}`, {
+    const res = await fetch(`${API_BASE}/applications/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -201,32 +190,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setApplications((prev) => prev.filter((app) => app.id !== id));
   };
 
-  // Run match analysis
   const runAnalysis = async (directJobDescription?: string) => {
     if (directJobDescription) {
       setJobDescription(directJobDescription);
     }
-
     const finalJobDescription = directJobDescription ?? jobDescription;
-
     if (!resumeFile || !finalJobDescription) {
       console.warn('Missing resume or job description');
       alert('Please upload a resume and provide a job description.');
       return;
     }
-
     if (!token) {
       console.error('No authentication token. Please log in again.');
       alert('Your session has expired. Please log in again.');
       return;
     }
-
     const formData = new FormData();
     formData.append('resume', resumeFile);
     formData.append('jobDescription', finalJobDescription);
-
     try {
-      const res = await fetch('http://localhost:8080/api/match/analyze', {
+      const res = await fetch(`${API_BASE}/match/analyze`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -236,7 +219,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         throw new Error(`HTTP ${res.status}: ${errorText}`);
       }
       const data = await res.json();
-
       setAnalysisResult({
         score: data.score,
         breakdown: data.breakdown,
@@ -268,7 +250,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     saveApplication,
     updateApplicationStatus,
     updateApplicationNotes,
-    deleteApplication,        // <-- added
+    deleteApplication,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

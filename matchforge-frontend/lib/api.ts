@@ -1,36 +1,21 @@
 // lib/api.ts
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
-export async function analyzeMatch(resumeFile: File, jobDescription: string) {
-  const formData = new FormData();
-  formData.append('resume', resumeFile);
-  formData.append('jobDescription', jobDescription);
+export const api = {
+  // Auth endpoints
+  login: (email: string, password: string) =>
+    fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }),
 
-  const response = await fetch(`${API_BASE}/match/analyze`, {
-    method: 'POST',
-    body: formData,
-  });
+  register: (email: string, password: string) =>
+    fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }),
 
-  if (!response.ok) throw new Error('Analysis failed');
-  return response.json();
-}
-
-export async function uploadResume(file: File) {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await fetch(`${API_BASE}/resumes/upload`, {
-    method: 'POST',
-    body: formData,
-  });
-  return response.json();
-}
-
-export async function parseJobDescription(rawText: string) {
-  const response = await fetch(`${API_BASE}/jobs/parse`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(rawText),
-  });
-  return response.json();
-}
+  // ... add other endpoints as needed
+};
