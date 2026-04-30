@@ -2,8 +2,6 @@ package com.example.matchforge.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,10 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OtpService {
 
     @Autowired
-    private JavaMailSender mailSender;
-
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+    private SendGridEmailService emailService;
 
     @Value("${otp.expiry}")
     private long expiryMillis;
@@ -30,6 +25,7 @@ public class OtpService {
     private static class OtpData {
         String otp;
         Instant expiry;
+
         OtpData(String otp, Instant expiry) {
             this.otp = otp;
             this.expiry = expiry;
@@ -42,12 +38,10 @@ public class OtpService {
 
     @Async
     public void sendOtpEmail(String email, String otp) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setFrom(fromEmail);
-        message.setSubject("MatchForge AI - Email Verification OTP");
-        message.setText("Your OTP for registration is: " + otp + "\n\nIt will expire in 5 minutes.");
-        mailSender.send(message);
+        String subject = "MatchForge AI - Email Verification OTP";
+        String body = "Your OTP for registration is: " + otp +
+                      "\n\nIt will expire in 5 minutes.";
+        emailService.sendEmail(email, subject, body);
     }
 
     public void storeOtp(String email, String otp) {
@@ -71,6 +65,7 @@ public class OtpService {
     // Clean up expired OTPs every 10 minutes
     @Scheduled(fixedRate = 600000)
     public void cleanExpiredOtps() {
-        otpStore.entrySet().removeIf(entry -> Instant.now().isAfter(entry.getValue().expiry));
+        otpStore.entrySet().removeIf(entry ->
+            Instant.now().isAfter(entry.getValue().expiry));
     }
 }
