@@ -26,10 +26,10 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 bg-[var(--accent)] text-white p-5 flex flex-col gap-2 hidden md:flex h-screen sticky top-0">
-      <div className="text-2xl font-display mb-2 pb-4 border-b border-white/15">
-        Match<span className="text-[var(--gold)]">Forge</span>
+      <div className="text-2xl font-display mb-8 pb-4 border-b border-white/15">
+        Match<span className="text-[var(--gold)]">Forge</span> AI
       </div>
-      <nav className="flex flex-col gap-3 flex-1">
+      <nav className="flex flex-col gap-1 flex-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
