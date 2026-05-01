@@ -23,70 +23,19 @@
   }
 
   .dark {
-  --ink: #f0f0f0;        /* slight off‑white, less harsh than pure white */
-  --ink2: #d1d5db;
-  --ink3: #b0b0b0;        /* lighter gray for secondary text */
-  --paper: #0a0a0f;
-  --card: #121217;
-  --border: #2a2a30;
-  --accent: #2d2d44;
-  --emerald: #4ade80;
-  --gold: #fbbf24;
-}
-
-
-  @layer base {
-  /* Ensure all text defaults to use CSS variables */
-  * {
-    @apply text-[var(--ink)];
+    --ink: #fafaf8;
+    --ink2: #c4c4c4;
+    --ink3: #9ca3af;
+    --paper: #0f0f12;
+    --card: #1a1a1f;
+    --border: #2a2a2e;
+    --accent: #2d2d44;
+    --emerald: #4ade80;
+    --gold: #fbbf24;
   }
 
-  /* Override specific Tailwind text utilities in dark mode */
-  .dark .text-black,
-  .dark .text-gray-900,
-  .dark .text-gray-800,
-  .dark .text-gray-700,
-  .dark .text-gray-600 {
-    color: var(--ink);
-  }
 
-  .dark .text-gray-500,
-  .dark .text-gray-400,
-  .dark .text-gray-300 {
-    color: var(--ink3);
-  }
-
-  /* Placeholder text in dark mode */
-  .dark ::placeholder,
-  .dark input::placeholder,
-  .dark textarea::placeholder {
-    color: var(--ink3) !important;
-    opacity: 0.7;
-  }
-
-  /* Input fields in dark mode */
-  .dark input,
-  .dark textarea,
-  .dark select {
-    background-color: var(--card);
-    color: var(--ink);
-    border-color: var(--border);
-  }
-
-  /* Ensure buttons and links that use Tailwind colors are readable */
-  .dark .btn,
-  .dark .btn-primary {
-    color: var(--ink);
-  }
-
-  /* Prose (if you use markdown / rich text) */
-  .dark .prose {
-    color: var(--ink3);
-  }
-  .dark .prose strong {
-    color: var(--ink);
-  }
-}
+  
 
   body {
     @apply bg-[var(--paper)] text-[var(--ink)] font-body;
