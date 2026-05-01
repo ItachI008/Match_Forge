@@ -13,7 +13,7 @@
 
 > **Analyze your resume against any job description, get an AI-powered match score, discover missing skills, manually log job applications, and track every stage of your job hunt — all in one place.**
 
-**🌐 Live Demo:** [https://match-forge-wsr2.vercel.app](https://match-forge-wsr2.vercel.app)
+**🌐 Live Demo:** [https://match-forge-alpha.vercel.app/](https://match-forge-alpha.vercel.app/)
 
 </div>
 
@@ -332,7 +332,7 @@ git push origin main
 NEXT_PUBLIC_API_URL=https://your-render-backend-url/api
 ```
 
-**Live URL:** [https://match-forge-wsr2.vercel.app](https://match-forge-wsr2.vercel.app)
+**Live URL:** [https://match-forge-alpha.vercel.app/](https://match-forge-alpha.vercel.app/)
 
 ---
 
